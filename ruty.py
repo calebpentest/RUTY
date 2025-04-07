@@ -31,8 +31,6 @@ DEFAULT_ITERATIONS = 2000000
 MIN_PASSWORD_LENGTH = 25
 VERSION = "3.0"
 
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 def setup_config_directory():
     if not os.path.exists(CONFIG_DIR):
         os.makedirs(CONFIG_DIR)
@@ -41,8 +39,10 @@ def setup_config_directory():
         open(LOG_FILE, 'a').close()
         os.chmod(LOG_FILE, 0o600)
 
+setup_config_directory()
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def generate_master_key(key_file=KEY_FILE):
-    setup_config_directory()
     if not os.path.exists(key_file):
         salt = secrets.token_bytes(32)
         kdf = Scrypt(salt=salt, length=32, n=2**16, r=8, p=1)
@@ -67,7 +67,6 @@ def get_key_salt(key_file=KEY_FILE):
         return data[32:]
 
 def generate_salt(salt_file=SALT_FILE):
-    setup_config_directory()
     if not os.path.exists(salt_file):
         salt = secrets.token_bytes(32)
         with open(salt_file, "wb") as f:
@@ -217,7 +216,6 @@ def main():
         print(f"7. {Fore.CYAN} Backup vault")
         print("8. Exit")
         choice = input(f"{Fore.CYAN}Select operation [1-8]: {Style.RESET_ALL}").strip()
-
         try:
             if choice == "1":
                 length = int(input(f"Length (min {MIN_PASSWORD_LENGTH}): ") or MIN_PASSWORD_LENGTH)
